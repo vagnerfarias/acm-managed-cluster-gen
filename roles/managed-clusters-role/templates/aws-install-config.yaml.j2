@@ -92,6 +92,7 @@ additionalTrustBundle:
 {% endfilter %}
 {% endif %}
 
+{% if repo is defined %}
 imageContentSources:
   - mirrors:
       - {{ repo }}/openshift/openshift-release-images
@@ -105,3 +106,4 @@ imageContentSources:
   - mirrors:
       - {{ repo }}/rhacm2
     source: registry.redhat.io/rhacm2
+{% endif %}
