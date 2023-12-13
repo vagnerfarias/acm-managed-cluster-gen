@@ -20,12 +20,4 @@ spec:
 {% if aws_kmsKeyARN is defined and not 'None' %}
         kmsKeyARN: {{ aws_kmsKeyARN }}
 {% endif %}
-      subnets:
-{% for subnet in aws_subnets %}
-        - {{ subnet }}
-{% endfor %}
-      zones: 
-{% for zone in aws_zone %}
-        - {{ zone }}
-{% endfor %}
   replicas: {{ aws_workers }}

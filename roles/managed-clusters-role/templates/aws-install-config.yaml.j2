@@ -9,9 +9,6 @@ compute:
     aws:
       type: {{ aws_worker_instance }}
       zones: 
-{% for zone in aws_zone %}
-        - {{ zone }}
-{% endfor %}
       rootVolume:
         iops: 4000
         size: 100
@@ -19,10 +16,6 @@ compute:
 {% if aws_kmsKeyARN is defined and not 'None' %}
         kmsKeyARN: {{ aws_kmsKeyARN }}
 {% endif %}
-      subnets: 
-{% for subnet in aws_subnets %}
-        - {{ subnet }}
-{% endfor %}
   replicas: {{ aws_workers }}
 controlPlane:
   name: master
@@ -32,9 +25,6 @@ controlPlane:
     aws:
       type: {{ aws_master_instance }}
       zones: 
-{% for zone in aws_zone %}
-        - {{ zone }}
-{% endfor %}
       rootVolume:
         iops: 4000
         size: 100
@@ -42,11 +32,7 @@ controlPlane:
 {% if aws_kmsKeyARN is defined and not 'None' %}
         kmsKeyARN: {{ aws_kmsKeyARN }}
 {% endif %}
-      subnets: 
-{% for subnet in aws_subnets %}
-        - {{ subnet }}
-{% endfor %}
-  replicas: 3
+  replicas: {{ aws_masters }}
 metadata:
   creationTimestamp: null
   name: {{ clustername }}
@@ -54,39 +40,30 @@ networking:
   clusterNetwork:
   - cidr: {{ clustercidr }}
     hostPrefix: 23
-  machineNetwork:
-{% for cidr in aws_vpccidr %}
-  - cidr: {{ cidr }}
-{% endfor %}
+  machineNetwork: 
+  - cidr: {{ machine_network }}
   networkType: {{ ocp_networkType | default("OpenShiftSDN") }}
   serviceNetwork:
   - {{ servicecidr }}
 platform:
   aws:
     region: {{ aws_region }}
-    hostedZone: {{ aws_hostedZone }}
 {% if aws_userTags is defined %}
     userTags:
 {% for tag in aws_userTags.items() %}
       {{ tag[0] }}: {{ tag[1] }}
 {% endfor %}{% endif %}
     subnets:  
-{% for subnet in aws_subnets %}
-      - {{ subnet }}
-{% endfor %}
-proxy:
-  httpProxy: {{ aws_proxy | default("") }}
-  httpsProxy: {{ aws_proxy | default("") }}
-  noProxy: {{ aws_noproxy | default("") }}
 pullSecret: '{{ pull_secret | to_json }}'
 {% if ssh_public_key is defined %}
 sshKey: {{ ssh_public_key }}
 {% endif %}
 fips: {{ fips | default('false') }}
 publish: {{ aws_publish | default('External') }}
-credentialsMode: {{ aws_credentialsMode | default("") }}
+credentialsMode: {{ aws_credentialsMode | default('""') }}
 {% if trustBundle is defined %}
-additionalTrustBundle: 
+additionalTrustBundlePolicy: Always
+additionalTrustBundle: |
 {% filter indent(width=2) %}
   {{ trustBundle }}
 {% endfilter %}
